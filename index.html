@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Bypasser</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 400px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 4px;
+            outline: none;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #1f78ff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            word-wrap: break-word;
+            max-width: 38ch; /* Chỉ hiển thị tối đa 38 ký tự */
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .result span {
+            flex-grow: 1;
+        }
+        .copy-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background: #1f78ff;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .copy-btn:hover {
+            background: #0056b3;
+        }
+        .truncated-url {
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Link Bypasser</h2>
+        <input type="text" id="linkInput" placeholder="Enter link here">
+        <button onclick="bypassLink()">Bypass Link</button>
+        <div id="result" class="result"></div>
+        <button class="result" class="copy-btn" onclick="copyToClipboard()">Copy</button>
+    </div>
+    <script>
+        async function bypassLink() {
+            var link = document.getElementById('linkInput').value;
+            var resultDiv = document.getElementById('result');
+            const linkPatterns = [
+                { pattern: /https:\/\/linkvertise\.com\/(.+)/, type: 'Linkvertise' },
+                { pattern: /https:\/\/linkvertise\.com\/dynamic\/(.+)/, type: 'LinkvertiseDynamic' },
+                { pattern: /https:\/\/rekonise\.com\/(.+)/, type: 'Rekonise' },
+                { pattern: /https:\/\/mboost\.com\/(.+)/, type: 'MBoost' },
+                { pattern: /https:\/\/boost\.ink\/(.+)/, type: 'Boost.ink' },
+                { pattern: /https:\/\/sub2get\.com\/(.+)/, type: 'Sub2Get' },
+                { pattern: /https:\/\/socialwolvez\.com\/(.+)/, type: 'SocialWolvez' },
+                { pattern: /https:\/\/work\.ink\/(.+)/, type: 'Work.ink' },
+                { pattern: /https:\/\/v\.gd\/(.+)/, type: 'v.gd' },
+                { pattern: /https:\/\/tinyurl\.com\/(.+)/, type: 'tinyurl.com' },
+                { pattern: /https:\/\/rebrand\.ly\/(.+)/, type: 'rebrand.ly' },
+                { pattern: /https:\/\/is\.gd\/(.+)/, type: 'is.gd' },
+                { pattern: /https:\/\/tinylink\.onl\/(.+)/, type: 'tinylink.onl' },
+                { pattern: /https:\/\/www\.mediafire\.com\/file\/(.+)/, type: 'MediaFire' },
+
+                { pattern: /https:\/\/loot-link\.com\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/loot-links\.com\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/lootlink\.org\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/lootlinks\.co\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/lootdest\.info\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/lootdest\.org\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/lootdest\.com\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/links-loot\.com\/(.+)/, type: 'LootLinks' },
+                { pattern: /https:\/\/linksloot\.net\/(.+)/, type: 'LootLinks' },
+
+                { pattern: /https:\/\/social-unlock\.com\/(.+)/, type: 'Social-Unlock.com' },
+                { pattern: /https:\/\/adfocus\.com\/(.+)/, type: 'AdFocus' },
+                { pattern: /https:\/\/flux\.li\/android\/external\/start.php\?HWID=(.+)/, type: 'Fluxus'},
+                { pattern: /https:\/\/pastedrop\.com\/(.+)/, type: 'PasteDrop' },
+                { pattern: /https:\/\/pastebin\.com\/(.+)/, type: 'Pastebin' },
+                { pattern: /https:\/\/sub2unlock\.(com|net|io)\/(.+)/, type: 'Sub2Unlock' },
+                { pattern: /https:\/\/sub4unlock\.(com|io)\/(.+)/, type: 'Sub4Unlock' },
+                { pattern: /https:\/\/gateway.platoboost\.com\/a\/(.+)/, type: 'PlatoBoost' },
+                { pattern: /https:\/\/unlocknow\.net\/(.+)/, type: 'UnlockNow.net' },
+                { pattern: /https:\/\/pandadevelopment\.net\/getkey\?service=vegax&hwid=(.+)/, type: 'vegax' },
+                { pattern: /https:\/\/paster.so\/(.+)/, type: 'paster.so'}
+            ]
+            let supportlink = null;
+            let linkType = null;
+            let extractedValue = null;
+
+            linkPatterns.forEach(linkPattern => {
+                const match = link.match(linkPattern.pattern);
+                if (match) {
+                    supportlink = match[0];
+                    linkType = linkPattern.type;
+                    extractedValue = match[1];
+                }
+            });
+
+            const supportethos = 'https://ethos.kys.gay/api/free/supported'
+            const supportdelorean = 'https://dlr.kys.gay/api/free/supported'
+
+            const apiethos = 'https://ethos.kys.gay/api/free/bypass'
+            const apidelorean = 'https://dlr.kys.gay/api/free/bypass'
+            const apiseekcat = 'http://fi3.bot-hosting.net:20252/api/fluxus'
+
+            let apikeysystem = null;
+            let apiAd = null;
+
+            let keysystemresponse = null;
+            let adlinksresponse = null;
+
+            const textbypass = '<span><strong>Result:</strong>{datakey}</span>'
+            const faildbypass ='<strong>error:</strong> {datareport}';
+
+            if (link) {
+                try {
+                    if (supportlink) {
+                        console.log(linkType)
+                        resultDiv.innerHTML = '<strong>debug:</strong> Start bypass..';
+                        switch (linkType) {
+                            case 'Linkvertise':
+                                apiAd = `https://linkvertise.com/${extractedValue}`;
+                                break;
+                            case 'LinkvertiseDynamic':
+                                apiAd = `https://linkvertise.com/dynamic/${extractedValue}`;
+                                break;
+                            case 'Rekonise':
+                                apiAd = `https://rekonise.com/${extractedValue}`;
+                                break;
+                            case 'MBoost':
+                                apiAd = `https://mboost.com/${extractedValue}`;
+                                break;
+                            case 'Boost.ink':
+                                apiAd = `https://boost.ink/${extractedValue}`;
+                                break;
+                            case 'Sub2Get':
+                                apiAd = `https://sub2get.com/${extractedValue}`;
+                                break;
+                            case 'SocialWolvez':
+                                apiAd = `https://socialwolvez.com/${extractedValue}`;
+                                break;
+                            case 'Work.ink':
+                                apiAd = `https://work.ink/${extractedValue}`;
+                                break;
+                            case 'v.gd':
+                                apiAd = `https://v.gd/${extractedValue}`;
+                                break;
+                            case 'tinyurl.com':
+                                apiAd = `https://tinyurl.com/${extractedValue}`;
+                                break;
+                            case 'rebrand.ly':
+                                apiAd = `https://rebrand.ly/${extractedValue}`;
+                                break;
+                            case 'is.gd':
+                                apiAd = `https://is.gd/${extractedValue}`;
+                                break;
+                            case 'tinylink.onl':
+                                apiAd = `https://tinylink.onl/${extractedValue}`;
+                                break;
+                            case 'MediaFire':
+                                apiAd = `https://www.mediafire.com/file/${extractedValue}`;
+                                break;
+                            case 'LootLinks':
+                                apiAd = `https://loot-link.com/${extractedValue}`;
+                                break;
+                            case 'Social-Unlock.com':
+                                apiAd = `https://social-unlock.com/${extractedValue}`;
+                                break;
+                            case 'AdFocus':
+                                apiAd = `https://adfocus.com/${extractedValue}`;
+                                break;
+                            case 'Fluxus':
+                                apikeysystem = `https://flux.li/android/external/start.php?HWID=${extractedValue}`;
+                                break;
+                            case 'PasteDrop':
+                                apiAd = `https://pastedrop.com/${extractedValue}`;
+                                break;
+                            case 'Pastebin':
+                                apiAd = `https://pastebin.com/${extractedValue}`;
+                                break;
+                            case 'Sub2Unlock':
+                                apiAd = `https://sub2unlock.${extractedValue}`;
+                                break;
+                            case 'Sub4Unlock':
+                                apiAd = `https://sub4unlock.${extractedValue}`;
+                                break;
+                            case 'PlatoBoost':
+                                apiAd = `https://platoboost.com/a/${extractedValue}`;
+                                break;
+                            case 'UnlockNow.net':
+                                apiAd = `https://unlocknow.net/${extractedValue}`;
+                                break;
+                            case 'vegax':
+                                apikeysystem = `https://pandadevelopment.net/getkey?service=vegax&hwid=${extractedValue}`;
+                                break;
+                            case 'paster.so':
+                                apiAd = `https://paster.so/${extractedValue}`
+                                break;
+                            default:
+                                console.log('Unknown link type');
+                        }
+                        async function RUN(model, Select) {
+                            try {
+                                if (Select === "Adlinks") {
+                                    if (apiAd) {
+                                        if (model === "1") {
+                                            try {
+                                                const BypassResponse = await axios.get(apiethos, { 
+                                                    params: { url: apiAd }
+                                                })
+                                                console.log('Model 1 was run.')
+                                                adlinksresponse = BypassResponse.data
+                                            } catch (err) {
+                                                adlinksresponse = "An error While Request API 1"
+                                            }
+                                        } else if (model === "2") {
+                                            try {
+                                                const BypassResponse = await axios.get(apidelorean, { 
+                                                    params: { url: apiAd }
+                                                })
+                                                console.log('Model 2 was run.')
+                                                adlinksresponse = BypassResponse.data;
+                                            } catch (err) {
+                                                adlinksresponse = "An error While Request API 2"
+                                            }
+                                        }
+                                    }
+                                } else if (Select === "Keysystem") {
+                                    if (apikeysystem) {
+                                        if (model === "1") {
+                                            try {
+                                                const BypassResponse = await axios.get(apiethos, { 
+                                                    params: { url: apikeysystem }
+                                                })
+                                                console.log('Model 1 was run.')
+                                                keysystemresponse = BypassResponse.data
+                                            } catch (err) {
+                                                keysystemresponse = "An error While Request API 1"
+                                            }
+                                        } else if (model === "2") {
+                                            try {
+                                                const BypassResponse = await axios.get(apiseekcat, { 
+                                                    params: { url: apikeysystem }
+                                                })
+                                                console.log('Model 2 was run.')
+                                                keysystemresponse = BypassResponse.data;
+                                            } catch (err) {
+                                                keysystemresponse = "An error While Request API 2"
+                                            }
+                                        } else if (model === "3") {
+                                            try {
+                                                const BypassResponse = await axios.get(apidelorean, { 
+                                                    params: { url: apikeysystem }
+                                                })
+                                                console.log('Model 3 was run.')
+                                                keysystemresponse = BypassResponse.data;
+                                            } catch (err) {
+                                                keysystemresponse = "An error While Request API 3"
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (err) {
+                                console.error(err)
+                            }
+                        }
+                        async function CheckResponse() {
+                            try {
+                                if (adlinksresponse) {
+                                    if (adlinksresponse.error || adlinksresponse.bypassed) {
+                                        if (adlinksresponse.error === "Ethos Free has failed to bypass your link.") {
+                                            const sendtext = faildbypass.replace('{datareport}', "An error deteced in API 1. We will send to API 2")
+                                            resultDiv.innerHTML = sendtext
+                                            await RUN("2", "Adlinks")
+                                            await CheckResponse()
+                                        } else if (adlinksresponse.error === "This is not supported by Ethos Free.") {
+                                            const sendtext = faildbypass.replace('{datareport}', adlinksresponse.error)
+                                            resultDiv.innerHTML = sendtext
+                                            await RUN("2", "Adlinks")
+                                            await CheckResponse()
+                                        } else if (adlinksresponse.bypassed) {
+                                            const sendtext = textbypass.replace('{datakey}', adlinksresponse.bypassed).replace('datacopykey', adlinksresponse.bypassed)
+                                            resultDiv.innerHTML = sendtext
+                                        }
+                                    } else if (adlinksresponse.result) {
+                                        if (adlinksresponse.result.startsWith("bypass fail!")) {
+                                            const sendtext = faildbypass.replace('{datareport}', "An error deteced in API 2. No more API to send bypass you link.")
+                                            resultDiv.innerHTML = sendtext
+                                        } else {
+                                            const sendtext = textbypass.replace('{datakey}', adlinksresponse.result).replace('datacopykey', adlinksresponse.result)
+                                            resultDiv.innerHTML = sendtext
+                                        }
+                                    }
+                                    if (adlinksresponse === "An error While Request API 1") {
+                                        const sendtext = faildbypass.replace('{datareport}', "An error while send API 1.")
+                                        resultDiv.innerHTML = sendtext
+                                    } else if (adlinksresponse === "An error While Request API 2") {
+                                        const sendtext = faildbypass.replace('{datareport}', "An error while send API 2.")
+                                        resultDiv.innerHTML = sendtext
+                                    }
+                                } else if (keysystemresponse) {
+                                    if (keysystemresponse.error || keysystemresponse.bypassed) {
+                                        if (keysystemresponse.error === "Ethos Free has failed to bypass your link.") {
+                                            const sendtext = faildbypass.replace('{datareport}', "An error deteced in API 1. We will send to API 2")
+                                            resultDiv.innerHTML = sendtext
+                                            await RUN("2", "Keysystem")
+                                        } else if (keysystemresponse.error === "This is not supported by Ethos Free.") {
+                                            const sendtext = faildbypass.replace('{datareport}', keysystemresponse.error)
+                                            resultDiv.innerHTML = sendtext
+                                            await RUN("2", "Keysystem")
+                                            await CheckResponse()
+                                        } else if (keysystemresponse.bypassed) {
+                                            const sendtext = textbypass.replace('{datakey}', keysystemresponse.bypassed).replace('datacopykey', keysystemresponse.result)
+                                            resultDiv.innerHTML = sendtext
+                                        }
+                                    } else if (keysystemresponse.key) {
+                                        const sendtext = textbypass.replace('{datakey}', keysystemresponse.key).replace('datacopykey', keysystemresponse.result)
+                                        resultDiv.innerHTML = sendtext
+                                    } else if (keysystemresponse.result) {
+                                        if (keysystemresponse.result.startsWith("bypass fail!")) {
+                                            const sendtext = faildbypass.replace('{datareport}', "An error deteced in API 2. No more API to send bypass you link.")
+                                            resultDiv.innerHTML = sendtext
+                                        } else {
+                                            const sendtext = textbypass.replace('{datakey}', keysystemresponse.result).replace('datacopykey', keysystemresponse.result)
+                                            resultDiv.innerHTML = sendtext
+                                        }
+                                    }
+
+                                    if (keysystemresponse === "An error While Request API 1") {
+                                        const sendtext = faildbypass.replace('{datareport}', "An error while send API 1.")
+                                        resultDiv.innerHTML = sendtext
+                                    } else if (keysystemresponse === "An error While Request API 2") {
+                                        const sendtext = faildbypass.replace('{datareport}', "An error while send API 2.")
+                                        resultDiv.innerHTML = sendtext
+                                    } else if (keysystemresponse === "An error While Request API 3") {
+                                        const sendtext = faildbypass.replace('{datareport}', "An error while send API 3.")
+                                        resultDiv.innerHTML = sendtext
+                                    }
+                                }
+                            } catch (err) {
+                                console.error(err)
+                            }
+                        }
+                            await RUN("1", "Adlinks")
+                            await RUN("1", "Keysystem")
+                            await CheckResponse()  
+                    } else {
+                        resultDiv.innerHTML = '<strong>error:</strong> Its link not support please enter link support.';
+                    }
+                } catch(err) {
+                    console.log(err)
+                }
+            } else {
+                resultDiv.innerHTML = '<strong>error:</strong> please enter a link.';
+            }
+        }
+
+        function copyToClipboard() {
+            const keyElement = document.getElementById('result');
+            const valuekey = keyElement.innerHTML.replace('<span><strong>Result:</strong>', '').replace('</span>', '');
+            
+            navigator.clipboard.writeText(valuekey).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy');
+            });
+        }
+    </script>
+</body>
+</html>
